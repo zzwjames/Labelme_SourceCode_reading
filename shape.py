@@ -17,9 +17,9 @@ def polygons_to_mask(img_shape, polygons, shape_type=None):
 
 def shape_to_mask(img_shape, points, shape_type=None,
                   line_width=10, point_size=5):
-    mask = np.zeros(img_shape[:2], dtype=np.uint8)
-    mask = PIL.Image.fromarray(mask)
-    draw = PIL.ImageDraw.Draw(mask)
+    mask = np.zeros(img_shape[:2], dtype=np.uint8)     #生成与图片大小一样的矩阵
+    mask = PIL.Image.fromarray(mask)                   #转化成image，此时为全黑
+    draw = PIL.ImageDraw.Draw(mask)                    #创建一个可以在给定图像上绘图的对象
     xy = [tuple(point) for point in points]
     if shape_type == 'circle':
         assert len(xy) == 2, 'Shape of shape_type=circle must have 2 points'
@@ -41,7 +41,7 @@ def shape_to_mask(img_shape, points, shape_type=None,
         draw.ellipse([cx - r, cy - r, cx + r, cy + r], outline=1, fill=1)
     else:
         assert len(xy) > 2, 'Polygon must have points more than 2'
-        draw.polygon(xy=xy, outline=1, fill=1)
+        draw.polygon(xy=xy, outline=1, fill=1) #xy=轮廓坐标,outline=轮廓颜色,fill=用于填充的颜色
     mask = np.array(mask, dtype=bool)
     return mask
 
@@ -49,23 +49,23 @@ def shape_to_mask(img_shape, points, shape_type=None,
 def shapes_to_label(img_shape, shapes, label_name_to_value, type='class'):
     assert type in ['class', 'instance']
 
-    cls = np.zeros(img_shape[:2], dtype=np.int32)
+    cls = np.zeros(img_shape[:2], dtype=np.int32)           #创建一个和图像大小一样的全0矩阵
     if type == 'instance':
         ins = np.zeros(img_shape[:2], dtype=np.int32)
         instance_names = ['_background_']
-    for shape in shapes:
-        points = shape['points']
-        label = shape['label']
-        shape_type = shape.get('shape_type', None)
-        if type == 'class':
-            cls_name = label
+    for shape in shapes:                                    #逐个遍历边界点
+        points = shape['points']                            #获取点坐标
+        label = shape['label']                              #获取标签
+        shape_type = shape.get('shape_type', None)          #shape_type=polygon
+        if type == 'class':                         
+            cls_name = label                                #举例：cls_name='human'
         elif type == 'instance':
             cls_name = label.split('-')[0]
             if label not in instance_names:
                 instance_names.append(label)
             ins_id = instance_names.index(label)
-        cls_id = label_name_to_value[cls_name]
-        mask = shape_to_mask(img_shape[:2], points, shape_type)
+        cls_id = label_name_to_value[cls_name]              #获取'human'对应的值，假设为1
+        mask = shape_to_mask(img_shape[:2], points, shape_type)  
         cls[mask] = cls_id
         if type == 'instance':
             ins[mask] = ins_id
