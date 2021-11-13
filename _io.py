@@ -2,8 +2,10 @@ import os.path as osp
 
 import numpy as np
 import PIL.Image
-
 from labelme.utils.draw import label_colormap
+
+#lblsave的函数功能，由于我们按照class给图片加像素导致整体图片特别暗，lblsave的功能就是在不改变像素值的情况下在图像原基础上加一个调色盘使得我们标注的目标更明显
+
 #样例输入：
 #utils.lblsave(osp.join(pngs_path, count[i].split(".")[0]+'.png'), new)
 
